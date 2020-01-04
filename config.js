@@ -1,5 +1,5 @@
 module.exports = {
-    apiKey: "AIzaSyBjUqGcFqPPq8LzGcJSwZVeWbJWBYjUbBE",
+    apiKey: "AI*********************YjUbBE",
     authDomain: "socialexp-154bc.firebaseapp.com",
     databaseURL: "https://socialexp-154bc.firebaseio.com",
     projectId: "socialexp-154bc",
