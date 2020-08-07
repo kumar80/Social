@@ -7,6 +7,7 @@ const firebase = require('firebase');
 firebase.initializeApp(config);
 
 exports.signup =  (req,res)=>{
+  
     const newUser ={
       password: req.body.password,
       email : req.body.email,
@@ -64,9 +65,9 @@ exports.signup =  (req,res)=>{
   }
 
   exports.login  =(req,res)=> {
-
+    console.log(req.body);
     const user = {
-      email : req.body.email,
+      email : req.body.email, 
       password : req.body.password
     };
     const {errors,valid} = validateLogin(user);
@@ -74,7 +75,7 @@ exports.signup =  (req,res)=>{
 
     firebase.auth().signInWithEmailAndPassword(user.email,user.password)
     .then(data => {
-      return data.user.getIdToken();
+      return data.user.getIdToken(); 
     })
     .then(token=>{
       return res.json({token});

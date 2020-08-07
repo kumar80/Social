@@ -1,5 +1,3 @@
-
-
 const functions = require('firebase-functions');
 //const  config = require('./utility/config.js');
 
@@ -9,7 +7,7 @@ const {admin, db} = require('./utility/admin.js')
 const express = require('express');
 const app = express();
 //Auth 
-const firebaseAuth  = require('./utility/firebaseAuth.js');
+const firebaseAuth  = require('./firebaseAuth.js');
 const {getAllFeed,createPost,getScream,comment,likeScream,unlikeScream,deleteScream}  = require('./handlers/screams.js');
 const {signup,login,uploadImage,addUserDetails,getAuthUser,getUserDetails,setNotificationsRead}  = require('./handlers/users.js');
 
@@ -145,3 +143,6 @@ exports.onScreamDelete = functions.firestore.document('/users/{userId}')
                 return true;
             })
     })
+
+    app.listen(process.env.PORT || 8080);
+ 
