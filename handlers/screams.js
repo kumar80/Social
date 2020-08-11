@@ -1,7 +1,8 @@
-const { modelScream, modelComment ,modelLike} = require("../utility/admin.js");
+const { modelScream, modelComment, modelLike } = require("../utility/admin.js");
 const { ObjectId } = require("mongodb");
 
 exports.createPost = (req, res) => {
+  
   if (req.body.body === undefined)
     return res.status(400).json({ comment: "Empty Body is not allowed" });
 
@@ -33,9 +34,9 @@ exports.comment = async (req, res) => {
   if (req.body.body === undefined)
     return res.status(400).json({ comment: "Empty Comment is not allowed" });
 
-  const scream = await  modelScream.findById(ObjectId(req.params.screamId));
+  const scream = await modelScream.findById(ObjectId(req.params.screamId));
 
-  if ( scream === null)
+  if (scream === null)
     return res.status(400).json({ error: "Post doest not exists" });
 
   const newComment = new modelComment();
@@ -48,62 +49,90 @@ exports.comment = async (req, res) => {
   newComment
     .save()
     .then(() => {
-      scream.commentCount=scream.commentCount+1;
+      scream.commentCount = scream.commentCount + 1;
       scream.save();
-      res.json(newComment)
+      res.json(newComment);
     })
     .catch((err) => {
       console.log("!! new Comment Error !! ", err);
     });
 };
 
-exports.likeScream = async (req,res) => {
-  const scream = await  modelScream.findById(ObjectId(req.params.screamId));
+exports.likeScream = async (req, res) => {
+  const scream = await modelScream.findById(ObjectId(req.params.screamId));
 
   if (scream === null)
     return res.status(400).json({ error: "Post doest not exists" });
 
-  if(await modelLike.findOne({userHandle:req.body.userHandle,screamId:req.params.screamId}) !== null) 
-    return res.status(400).json({ error : "You have already liked the post"});
-  
-    const newLike = new modelLike();
-    newLike.createdAt = new Date().toISOString();
-    newLike.userHandle = req.body.userHandle;
-    newLike.screamId = req.params.screamId;
+  if (
+    (await modelLike.findOne({
+      userHandle: req.body.userHandle,
+      screamId: req.params.screamId,
+    })) !== null
+  )
+    return res.status(400).json({ error: "You have already liked the post" });
 
-    newLike.save().then(() => {
-      scream.likeCount=scream.likeCount+1;
+  const newLike = new modelLike();
+  newLike.createdAt = new Date().toISOString();
+  newLike.userHandle = req.body.userHandle;
+  newLike.screamId = req.params.screamId;
+
+  newLike
+    .save()
+    .then(() => {
+      scream.likeCount = scream.likeCount + 1;
       scream.save();
       res.json(newLike);
     })
     .catch((err) => {
       console.log("!! new Like Error !! ", err);
     });
-}
+};
 
-exports.unlikeScream = async (req,res) => {
-  const scream = await  modelScream.findById(ObjectId(req.params.screamId));
+exports.unlikeScream = async (req, res) => {
+  const scream = await modelScream.findById(ObjectId(req.params.screamId));
 
   if (scream === null)
     return res.status(400).json({ error: "Post doest not exists" });
 
-  if(await modelLike.findOne({userHandle:req.body.userHandle,screamId:req.params.screamId}) === null) 
-    return res.status(400).json({ error : "Cannot unlike"});
-  
-    const newLike = new modelLike();
-    newLike.createdAt = new Date().toISOString();
-    newLike.userHandle = req.body.userHandle;
-    newLike.screamId = req.params.screamId;
+  if (
+    (await modelLike.findOne({
+      userHandle: req.body.userHandle,
+      screamId: req.params.screamId,
+    })) === null
+  )
+    return res.status(400).json({ error: "Cannot unlike" });
 
-    newLike.save().then(() => {
-      scream.likeCount=scream.likeCount+1;
+  modelLike
+    .deleteOne({
+      userHandle: req.body.userHandle,
+      screamId: req.params.screamId,
+    })
+    .then(() => {
+      scream.likeCount = scream.likeCount - 1;
       scream.save();
-      res.json(newLike);
+      res.json("Unliked");
     })
     .catch((err) => {
-      console.log("!! new Like Error !! ", err);
+      console.log("!! unlike Error !!", err);
     });
-}
+};
+
+exports.deleteScream = async (req, res) => {
+  const scream = await modelScream.findById(ObjectId(req.params.screamId));
+
+  if (scream === null)
+    return res.status(400).json({ error: "Post doest not exists" });
+
+  scream.delete();
+
+  const d1 = await modelLike.deleteMany({ screamId: req.params.screamId });
+  const d2 = await modelComment.deleteMany({ screamId: req.params.screamId });
+
+  if (d1.ok == 1 && d2.ok == 1) return res.json("Post Deleted");
+  else return res.status(400).json({ error: "Error Deleting" });
+};
+
 // exports.getAllFeed  =(req, res) => {
 //     admin
 //       .firestore()

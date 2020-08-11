@@ -58,3 +58,4 @@ exports.reduceUserDetails = (data) => {
 
         return userDetails;
 }
+
