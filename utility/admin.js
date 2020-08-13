@@ -1,13 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
-const dbURL = "mongodb://localhost/fb";
-mongoose
-  .connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
-  .catch((err) => {
-    console.log("!! Mongoose Connection Error !!", err);
-  });
+const { jwtKey, jwtExpirySeconds } = require("./config");
 
 const schemaScream = new mongoose.Schema({
   body: String,
@@ -47,8 +41,6 @@ const schemaUser = new mongoose.Schema({
   hash: String,
 });
 
-
-
 schemaUser.methods.validatePassword = function (password) {
   bcrypt.compare(password, this.hash, (err, res) => res);
 };
@@ -64,7 +56,10 @@ schemaUser.methods.generateJWT = function () {
       id: this._id,
       exp: parseInt(expirationDate.getTime() / 1000, 10),
     },
-    "secret"
+    jwtKey,
+    {
+      algorithm: "HS256",
+    }
   );
 };
 

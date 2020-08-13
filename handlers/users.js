@@ -1,5 +1,7 @@
 const { modelAvatar, modelUser } = require("../utility/admin.js");
 const { validateSignup, validateLogin } = require("../utility/validators.js");
+const jwtKey = "my_secret_key";
+const jwtExpirySeconds = 3000;
 
 exports.uploadImage = async (req, res) => {
   const BusBoy = require("busboy");
@@ -78,7 +80,7 @@ exports.signup = async (req, res) => {
     newUser
       .save()
       .then(() => {
-        return res.json({ user: newUser.toAuthJSON()});
+        return res.json({ user: newUser.toAuthJSON() });
       })
       .catch((err) => {
         return res.status(500).json({ error: "Something went wrong#2" });
@@ -97,24 +99,19 @@ exports.login = (req, res, next) => {
   if (!user.password) {
     return res.status(422).json({ error: "password is required" });
   }
-  passport.authenticate("local", (err, user, info) => {
-    console.log("auth ", info);
-    
+  passport.authenticate("local",{session:false}, (err, user, info) => {
     if (info) {
       return res.send(info.message);
     }
     if (err) {
-      return next(err);
+      return res.json({err : "gjee"});
     }
     if (!user) {
       return res.redirect("/login");
     }
-    req.login(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      return res.redirect("/authrequired");
-    });
+   const token =  user.generateJWT();
+   console.log(token);
+   res.json(token);
   })(req, res);
 };
 // exports.signup =  (req,res)=>{
