@@ -1,6 +1,6 @@
 # FriendsBase
 
-A nice project , don't believe me give it a try.
+A nice project , don't believe me? give it a try.
 
 ---
 ## Requirements
