@@ -2,36 +2,48 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const passport = require("passport");
-const { passportCallback,auth} = require("./utility/auth");
+const { passportCallback, auth } = require("./utility/auth");
 const LocalStrategy = require("passport-local").Strategy;
 
 const PORT = process.env.PORT || 8080;
 
 const {
   createPost,
-  getPosts,
+  getScream,
   comment,
   likeScream,
   unlikeScream,
   deleteScream,
+  feed,
+  deleteComment,
 } = require("./handlers/screams.js");
 
-const { uploadImage, signup, login } = require("./handlers/users.js");
+const {
+  uploadImage,
+  signup,
+  login,
+  setNotificationsRead,
+} = require("./handlers/users.js");
 
 app.use(bodyParser.json());
 app.use(require("morgan")("dev"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.post("/scream", createPost);
-app.get("/getscream", getPosts);
-app.post("/scream/:screamId/comment", comment);
-app.get("/scream/:screamId/like", likeScream);
-app.get("/scream/:screamId/unlike", unlikeScream);
-app.delete("/scream/:screamId/delete", deleteScream);
+app.get("/scream/:screamId", getScream);
+app.get("/feed", feed);
+app.get("/scream/:screamId/like",auth, likeScream);
+
+app.delete("/scream/:screamId/unlike", auth,unlikeScream);
+app.delete("/scream/:screamId/deletecomment", auth,deleteComment);
+app.delete("/scream/:screamId/delete", auth,deleteScream);
+
+app.post("/scream/:screamId/comment", auth,comment);
+app.post("/scream",auth, createPost);
 app.post("/avatar/upload", uploadImage);
-app.post("/signup",signup);
-app.post("/login", auth, login);
+app.post("/signup", signup);
+app.post("/login", login);
+app.post("/notifications",auth, setNotificationsRead);
 
 passport.use(
   new LocalStrategy(

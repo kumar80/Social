@@ -5,30 +5,33 @@ const { jwtKey, jwtExpirySeconds } = require("./config");
 
 const schemaScream = new mongoose.Schema({
   body: String,
-  userHandle: String,
+  handle: String,
   createdAt: String,
   commentCount: Number,
   likeCount: Number,
+  avatar: String,
 });
 
 const schemaComment = new mongoose.Schema({
   body: String,
   createdAt: String,
-  userHandle: String,
+  handle: String,
   screamId: String,
+  notificationId: String,
 });
 
 const schemaLikes = new mongoose.Schema({
-  userHandle: String,
+  handle: String,
   createdAt: String,
   screamId: String,
+  notificationId: String,
 });
 
 const schemaAvatar = new mongoose.Schema({
   userId: String,
   path: String,
   fileName: String,
-  userHandle: String,
+  handle: String,
   createdAt: String,
 });
 
@@ -41,8 +44,20 @@ const schemaUser = new mongoose.Schema({
   hash: String,
 });
 
-schemaUser.methods.validatePassword = function (password) {
-  bcrypt.compare(password, this.hash, (err, res) => res);
+const schemaNotification = new mongoose.Schema({
+  type: String,
+  read: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now },
+  sender: String,
+  receiver: String,
+});
+//https://stackoverflow.com/questions/23667086/why-is-my-variable-unaltered-after-i-modify-it-inside-of-a-function-asynchron
+schemaUser.methods.validatePassword = async function (password) {
+  return bcrypt.compare(password, this.hash);
+  //  , (err, res) => {
+  //     console.log(password,this.hash);
+  //       return res;
+  // });
 };
 
 schemaUser.methods.generateJWT = function () {
@@ -54,6 +69,8 @@ schemaUser.methods.generateJWT = function () {
     {
       email: this.email,
       id: this._id,
+      avatar: this.avatar,
+      handle: this.handle,
       exp: parseInt(expirationDate.getTime() / 1000, 10),
     },
     jwtKey,
@@ -76,6 +93,7 @@ const modelComment = mongoose.model("Comments", schemaComment);
 const modelLike = mongoose.model("Likes", schemaLikes);
 const modelAvatar = mongoose.model("Avatars", schemaAvatar);
 const modelUser = mongoose.model("Users", schemaUser);
+const modelNotification = mongoose.model("Notifications", schemaNotification);
 
 module.exports = {
   modelScream,
@@ -83,4 +101,5 @@ module.exports = {
   modelLike,
   modelAvatar,
   modelUser,
+  modelNotification,
 };
