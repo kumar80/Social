@@ -2,59 +2,44 @@ const {
   modelAvatar,
   modelUser,
   modelNotification,
+  modelScream,
+  modelLike,
 } = require("../utility/admin.js");
 const { validateSignup, validateLogin } = require("../utility/validators.js");
-const jwtKey = "my_secret_key";
-const jwtExpirySeconds = 3000;
+const { ObjectID } = require("mongodb");
 
 exports.uploadImage = async (req, res) => {
   const BusBoy = require("busboy");
   const path = require("path");
   const fs = require("fs");
+  const { user } = req;
   const busboy = new BusBoy({
     headers: req.headers,
     limits: { files: 1, fileSize: 5 * 1024 * 1024 },
   });
-  const doc = new modelAvatar({
-    createdAt: new Date().toISOString(),
-    handle: "xxxx",
-    userId: "xxxx",
-    path: "xxxx",
-  });
 
-  const fieldData = {};
+  /*  
+ req.on('data', function(d) {
+    console.dir(''+d);
+    }); 
+*/
   req.pipe(busboy);
-
-  busboy.on("field", function (
-    fieldname,
-    val,
-    fieldnameTruncated,
-    valTruncated,
-    encoding,
-    mimetype
-  ) {
-    fieldData[fieldname] = val;
-  });
-
+  let filePath;
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
       return res.status(400).json({
-        error: "Only jpeg or png allowed",
+        error: "Only jpeg / png allowed",
       });
     }
     const extension = filename.split(".")[filename.split(".").length - 1];
-    filename = fieldData["userId"] + "." + extension;
-    const filePath = path.join(__dirname, "/../uploads/" + filename);
-    // doc.userId=fieldData["userId"];
-    // doc.path=filePath;
-    // doc.fileName=filename
-    // doc.handle=handle;
+
+    filename = user.handle + "." + extension;
+    filePath = path.join(__dirname, "/../uploads/" + filename);
     file.pipe(fs.createWriteStream(filePath));
   });
 
   busboy.on("finish", function () {
-    res.writeHead(200, { Connection: "close" });
-    res.end("Upload Succesful");
+     res.status(200).json({message : "Uploaded!"});
   });
 };
 
@@ -114,7 +99,7 @@ exports.login = (req, res, next) => {
       return res.redirect("/login");
     }
     const token = user.generateJWT();
-   // console.log(token);
+    // console.log(token);
     res.json(token);
   })(req, res);
 };
@@ -130,6 +115,34 @@ exports.setNotificationsRead = (req, res) => {
     });
 };
 
+exports.getUser = (req, res) => {
+  modelUser
+    .findOne({ handle: req.params.handle })
+    .then((user) => {
+      user.hash = "secret";
+      modelScream
+        .find({ handle: req.params.handle })
+        .sort({ createdAt: "desc" })
+        .then((data) => {
+          res.json({ posts: data, user: user });
+        })
+        .catch((err) => {
+          return res.json({ error: "ERRRRRRRRRRRRRRR" });
+        });
+    })
+    .catch((err) => {
+      return res.json({ error: "x" });
+    });
+};
+
+exports.getAuthUser = async (req, res) => {
+  const posts = [];
+  const user = await modelUser.findById(ObjectID(req.user.id));
+  const postCur = modelScream.find({ handle: user.handle }).cursor();
+  cursor.next.then((doc) => {
+    modelLike.find({});
+  });
+};
 ///////////////////////////////////////////////////////
 
 exports.addUserDetails = (req, res) => {
@@ -229,5 +242,3 @@ exports.getUserDetails = (req, res) => {
       res.status(501).json({ error: err.code });
     });
 };
-
-

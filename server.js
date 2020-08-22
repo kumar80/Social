@@ -22,6 +22,7 @@ const {
   uploadImage,
   signup,
   login,
+  getUser,
   setNotificationsRead,
 } = require("./handlers/users.js");
 
@@ -33,14 +34,14 @@ app.use(passport.session());
 app.get("/scream/:screamId", getScream);
 app.get("/feed", feed);
 app.get("/scream/:screamId/like",auth, likeScream);
-
+app.get("/user/:handle",getUser)
 app.delete("/scream/:screamId/unlike", auth,unlikeScream);
 app.delete("/scream/:screamId/deletecomment", auth,deleteComment);
 app.delete("/scream/:screamId/delete", auth,deleteScream);
 
 app.post("/scream/:screamId/comment", auth,comment);
 app.post("/scream",auth, createPost);
-app.post("/avatar/upload", uploadImage);
+app.post("/avatar/upload", auth,uploadImage);
 app.post("/signup", signup);
 app.post("/login", login);
 app.post("/notifications",auth, setNotificationsRead);

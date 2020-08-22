@@ -17,6 +17,7 @@ const schemaComment = new mongoose.Schema({
   createdAt: String,
   handle: String,
   screamId: String,
+  avatar: String,
   notificationId: String,
 });
 
@@ -28,11 +29,11 @@ const schemaLikes = new mongoose.Schema({
 });
 
 const schemaAvatar = new mongoose.Schema({
-  userId: String,
+  handle: String,
   path: String,
   fileName: String,
-  handle: String,
-  createdAt: String,
+  userId: String,
+  createdAt: { type: Date, default: Date.now },
 });
 
 const schemaUser = new mongoose.Schema({

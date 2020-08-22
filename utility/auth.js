@@ -44,8 +44,7 @@ const auth = (req, res, next) => {
 
     return res.status(400).json({ error: "unknown error" });
   }
-//  console.log(payload);
-  let user = {};
+  const user = {}
   user.avatar = payload.avatar;
   user.id = payload.id;
   user.email = payload.email;

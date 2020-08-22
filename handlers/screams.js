@@ -52,7 +52,8 @@ exports.comment = async (req, res) => {
   newComment.screamId = req.params.screamId;
   newComment.handle = req.user.handle;
   newComment.notificationId = notification._id;
-
+  newComment.avatar = req.user.avatar;
+  
   newComment
     .save()
     .then(() => {
