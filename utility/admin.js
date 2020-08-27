@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { jwtKey, jwtExpirySeconds } = require("./config");
+const {
+  jwtKey,
+  jwtExpirySeconds
+} = require("./config");
 
 const schemaScream = new mongoose.Schema({
   body: String,
@@ -33,7 +36,10 @@ const schemaAvatar = new mongoose.Schema({
   path: String,
   fileName: String,
   userId: String,
-  createdAt: { type: Date, default: Date.now },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
 });
 
 const schemaUser = new mongoose.Schema({
@@ -47,8 +53,14 @@ const schemaUser = new mongoose.Schema({
 
 const schemaNotification = new mongoose.Schema({
   type: String,
-  read: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now },
+  read: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
   sender: String,
   receiver: String,
 });
@@ -66,16 +78,14 @@ schemaUser.methods.generateJWT = function () {
   const expirationDate = new Date(today);
   expirationDate.setDate(today.getDate() + 60);
 
-  return jwt.sign(
-    {
+  return jwt.sign({
       email: this.email,
       id: this._id,
       avatar: this.avatar,
       handle: this.handle,
       exp: parseInt(expirationDate.getTime() / 1000, 10),
     },
-    jwtKey,
-    {
+    jwtKey, {
       algorithm: "HS256",
     }
   );

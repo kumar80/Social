@@ -5,17 +5,27 @@ const {
   modelScream,
   modelLike,
 } = require("../utility/admin.js");
-const { validateSignup, validateLogin } = require("../utility/validators.js");
-const { ObjectID } = require("mongodb");
+const {
+  validateSignup,
+  validateLogin
+} = require("../utility/validators.js");
+const {
+  ObjectID
+} = require("mongodb");
 
 exports.uploadImage = async (req, res) => {
   const BusBoy = require("busboy");
   const path = require("path");
   const fs = require("fs");
-  const { user } = req;
+  const {
+    user
+  } = req;
   const busboy = new BusBoy({
     headers: req.headers,
-    limits: { files: 1, fileSize: 5 * 1024 * 1024 },
+    limits: {
+      files: 1,
+      fileSize: 5 * 1024 * 1024
+    },
   });
 
   /*  
@@ -39,7 +49,9 @@ exports.uploadImage = async (req, res) => {
   });
 
   busboy.on("finish", function () {
-     res.status(200).json({message : "Uploaded!"});
+    res.status(200).json({
+      message: "Uploaded!"
+    });
   });
 };
 
@@ -55,23 +67,35 @@ exports.signup = async (req, res) => {
   });
 
   const doc = await modelUser.find({
-    $or: [{ handle: newUser.handle }, { email: newUser.email }],
+    $or: [{
+      handle: newUser.handle
+    }, {
+      email: newUser.email
+    }],
   });
   if (doc.length !== 0)
-    return res.status(400).json({ error: "Handle Or Email already taken" });
+    return res.status(400).json({
+      error: "Handle Or Email already taken"
+    });
 
   bcrypt.hash(req.body.password, 15, (err, hash) => {
     if (err) {
-      return res.status(500).json({ error: " Something went wrong#1" });
+      return res.status(500).json({
+        error: " Something went wrong#1"
+      });
     }
     newUser.hash = hash;
     newUser
       .save()
       .then(() => {
-        return res.json({ user: newUser.toAuthJSON() });
+        return res.json({
+          user: newUser.toAuthJSON()
+        });
       })
       .catch((err) => {
-        return res.status(500).json({ error: "Something went wrong#2" });
+        return res.status(500).json({
+          error: "Something went wrong#2"
+        });
       });
   });
 };
@@ -79,21 +103,31 @@ exports.signup = async (req, res) => {
 exports.login = (req, res, next) => {
   const passport = require("passport");
 
-  const { body: user } = req;
+  const {
+    body: user
+  } = req;
   if (!user.email) {
-    return res.status(422).json({ error: "email is required" });
+    return res.status(422).json({
+      error: "email is required"
+    });
   }
 
   if (!user.password) {
-    return res.status(422).json({ error: "password is required" });
+    return res.status(422).json({
+      error: "password is required"
+    });
   }
-  passport.authenticate("local", { session: false }, (err, user, info) => {
+  passport.authenticate("local", {
+    session: false
+  }, (err, user, info) => {
     if (info) {
       return res.send(info.message);
     }
     console.log(err);
     if (err) {
-      return res.json({ err: "gjee" });
+      return res.json({
+        err: "gjee"
+      });
     }
     if (!user) {
       return res.redirect("/login");
@@ -106,39 +140,62 @@ exports.login = (req, res, next) => {
 
 exports.setNotificationsRead = (req, res) => {
   modelNotification.update
-    .query({ handle: req.user.handle }, { read: true })
+    .query({
+      handle: req.user.handle
+    }, {
+      read: true
+    })
     .then(() => {
-      return res.json({ message: "Notifications Read" });
+      return res.json({
+        message: "Notifications Read"
+      });
     })
     .catch((err) => {
-      return res.json({ err: "Error" });
+      return res.json({
+        err: "Error"
+      });
     });
 };
 
 exports.getUser = (req, res) => {
   modelUser
-    .findOne({ handle: req.params.handle })
+    .findOne({
+      handle: req.params.handle
+    })
     .then((user) => {
       user.hash = "secret";
       modelScream
-        .find({ handle: req.params.handle })
-        .sort({ createdAt: "desc" })
+        .find({
+          handle: req.params.handle
+        })
+        .sort({
+          createdAt: "desc"
+        })
         .then((data) => {
-          res.json({ posts: data, user: user });
+          res.json({
+            posts: data,
+            user: user
+          });
         })
         .catch((err) => {
-          return res.json({ error: "ERRRRRRRRRRRRRRR" });
+          return res.json({
+            error: "ERRRRRRRRRRRRRRR"
+          });
         });
     })
     .catch((err) => {
-      return res.json({ error: "x" });
+      return res.json({
+        error: "x"
+      });
     });
 };
 
 exports.getAuthUser = async (req, res) => {
   const posts = [];
   const user = await modelUser.findById(ObjectID(req.user.id));
-  const postCur = modelScream.find({ handle: user.handle }).cursor();
+  const postCur = modelScream.find({
+    handle: user.handle
+  }).cursor();
   cursor.next.then((doc) => {
     modelLike.find({});
   });
@@ -151,11 +208,15 @@ exports.addUserDetails = (req, res) => {
   db.doc(`/users/${req.user.handle}`)
     .update(userDetails)
     .then(() => {
-      return res.json({ message: "Details Updated !" });
+      return res.json({
+        message: "Details Updated !"
+      });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: err.code });
+      return res.status(500).json({
+        error: err.code
+      });
     });
 };
 
@@ -204,7 +265,9 @@ exports.getAuthUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).json({ error: err });
+      return res.status(500).json({
+        error: err
+      });
     });
 };
 
@@ -220,7 +283,9 @@ exports.getUserDetails = (req, res) => {
           .where("handle", "==", req.params.handle)
           .orderBy("createdAt", "desc")
           .get();
-      } else return res.status(404).json({ error: "user Not Found" });
+      } else return res.status(404).json({
+        error: "user Not Found"
+      });
     })
     .then((data) => {
       userData.scream = [];
@@ -239,6 +304,8 @@ exports.getUserDetails = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      res.status(501).json({ error: err.code });
+      res.status(501).json({
+        error: err.code
+      });
     });
 };
