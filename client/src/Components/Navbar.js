@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -6,7 +6,6 @@ import Button from "@material-ui/core/Button";
 import { Switch as Toogle, FormControlLabel } from "@material-ui/core";
 
 import styles from "./Navbar.module.css";
-
 
 const Navbar = (props) => {
   const { toogleDarkMode } = props;

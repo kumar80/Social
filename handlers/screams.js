@@ -226,10 +226,11 @@ exports.feed = (req, res) => {
       createdAt: "desc"
     })
     .then((user) => {
+      console.log("SENT");
       res.json(user);
     })
     .catch((err) => {
-      console.log(err);
+     // console.log(err);
       res.json({
         error: "error fetching posts"
       });

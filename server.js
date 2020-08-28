@@ -4,8 +4,9 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const { passportCallback, auth } = require("./utility/auth");
 const LocalStrategy = require("passport-local").Strategy;
+var cors = require('cors')
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 9999;
 
 const {
   createPost,
@@ -24,8 +25,10 @@ const {
   login,
   getUser,
   setNotificationsRead,
+  getAvatar,
 } = require("./handlers/users.js");
 
+app.use(cors({origin : 'http://localhost:3000'}));
 app.use(bodyParser.json());
 app.use(require("morgan")("dev"));
 app.use(passport.initialize());
@@ -34,7 +37,8 @@ app.use(passport.session());
 app.get("/scream/:screamId", getScream);
 app.get("/feed", feed);
 app.get("/scream/:screamId/like",auth, likeScream);
-app.get("/user/:handle",getUser)
+app.get("/user/:handle",getUser);
+app.get("/avatar/:avatar",getAvatar);
 app.delete("/scream/:screamId/unlike", auth,unlikeScream);
 app.delete("/scream/:screamId/deletecomment", auth,deleteComment);
 app.delete("/scream/:screamId/delete", auth,deleteScream);
@@ -46,9 +50,10 @@ app.post("/signup", signup);
 app.post("/login", login);
 app.post("/notifications",auth, setNotificationsRead);
 
+
 passport.use(
   new LocalStrategy(
-    { usernameField: "handle", passwordField: "password" },
+    { usernameField: "email", passwordField: "password" },
     passportCallback
   )
 );

@@ -10,4 +10,7 @@ mongoose
 module.exports = {
   jwtKey: "my_secret_key",
   jwtExpirySeconds: 3000,
+  avatarDir: "/home/maverick/Documents/Projects/Social/assets/avatars",
+  defaultAvatar: "default-avatar.png",
+  defaultAvatarExtension : "png",
 };

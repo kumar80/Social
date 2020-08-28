@@ -5,26 +5,25 @@ const {
   modelScream,
   modelLike,
 } = require("../utility/admin.js");
+const { validateSignup, validateLogin } = require("../utility/validators.js");
+const { ObjectID } = require("mongodb");
+
 const {
-  validateSignup,
-  validateLogin
-} = require("../utility/validators.js");
-const {
-  ObjectID
-} = require("mongodb");
+  avatarDir,
+  defaultAvatar,
+  defaultAvatarExtension,
+} = require("../utility/config");
 
 exports.uploadImage = async (req, res) => {
   const BusBoy = require("busboy");
   const path = require("path");
   const fs = require("fs");
-  const {
-    user
-  } = req;
+  const { user } = req;
   const busboy = new BusBoy({
     headers: req.headers,
     limits: {
       files: 1,
-      fileSize: 5 * 1024 * 1024
+      fileSize: 5 * 1024 * 1024,
     },
   });
 
@@ -44,115 +43,141 @@ exports.uploadImage = async (req, res) => {
     const extension = filename.split(".")[filename.split(".").length - 1];
 
     filename = user.handle + "." + extension;
-    filePath = path.join(__dirname, "/../uploads/" + filename);
+    filePath = path.join(avatarDir + filename);
+
     file.pipe(fs.createWriteStream(filePath));
   });
 
   busboy.on("finish", function () {
     res.status(200).json({
-      message: "Uploaded!"
+      message: "Uploaded!",
     });
   });
 };
 
 exports.signup = async (req, res) => {
   const bcrypt = require("bcrypt");
+  const fs = require("fs");
 
   const newUser = new modelUser({
     email: req.body.email,
     handle: req.body.handle,
     bio: "xxx",
     createdAt: new Date().toISOString(),
-    avatar: "../assets/default-avatar.png",
+    avatar: req.body.handle+'.' + defaultAvatarExtension,
   });
 
   const doc = await modelUser.find({
-    $or: [{
-      handle: newUser.handle
-    }, {
-      email: newUser.email
-    }],
+    $or: [
+      {
+        handle: newUser.handle,
+      },
+      {
+        email: newUser.email,
+      },
+    ],
   });
   if (doc.length !== 0)
     return res.status(400).json({
-      error: "Handle Or Email already taken"
+      error: "Handle Or Email already taken",
     });
 
   bcrypt.hash(req.body.password, 15, (err, hash) => {
     if (err) {
       return res.status(500).json({
-        error: " Something went wrong#1"
+        error: " Something went wrong#1",
       });
     }
+
+    fs.copyFile(
+      avatarDir + "/" + defaultAvatar,
+      avatarDir + "/" + newUser.handle + "." + defaultAvatarExtension,
+      (err) => {
+        if (err) {
+          return res.json({ error: "default image error" });
+        }
+        console.log("done");
+      }
+    );
+
     newUser.hash = hash;
     newUser
       .save()
       .then(() => {
         return res.json({
-          user: newUser.toAuthJSON()
+          user: newUser.toAuthJSON(),
         });
       })
       .catch((err) => {
         return res.status(500).json({
-          error: "Something went wrong#2"
+          error: "Something went wrong#2",
         });
       });
   });
 };
 
+exports.getAvatar = (req, res) => {
+  res.sendFile(avatarDir + '/' +  `${req.params.avatar}`);
+};
+
 exports.login = (req, res, next) => {
   const passport = require("passport");
 
-  const {
-    body: user
-  } = req;
+  const { body: user } = req;
   if (!user.email) {
     return res.status(422).json({
-      error: "email is required"
+      error: "email is required",
     });
-  }
+  } 
 
   if (!user.password) {
     return res.status(422).json({
-      error: "password is required"
+      error: "password is required",
     });
   }
-  passport.authenticate("local", {
-    session: false
-  }, (err, user, info) => {
-    if (info) {
-      return res.send(info.message);
+  passport.authenticate(
+    "local",
+    {
+      session: false,
+    },
+    (err, user, info) => {
+      if (info) {
+        return res.send(info);
+      }
+     // console.log(err);
+      if (err) {
+        return res.json({
+          error: err,
+        });
+      }
+      if (!user) {
+        return res.redirect("/login");
+      }
+      const token = user.generateJWT();
+     //  console.log(token);
+      res.json(token);
     }
-    console.log(err);
-    if (err) {
-      return res.json({
-        err: "gjee"
-      });
-    }
-    if (!user) {
-      return res.redirect("/login");
-    }
-    const token = user.generateJWT();
-    // console.log(token);
-    res.json(token);
-  })(req, res);
+  )(req, res);
 };
 
 exports.setNotificationsRead = (req, res) => {
   modelNotification.update
-    .query({
-      handle: req.user.handle
-    }, {
-      read: true
-    })
+    .query(
+      {
+        handle: req.user.handle,
+      },
+      {
+        read: true,
+      }
+    )
     .then(() => {
       return res.json({
-        message: "Notifications Read"
+        message: "Notifications Read",
       });
     })
     .catch((err) => {
       return res.json({
-        err: "Error"
+        err: "Error",
       });
     });
 };
@@ -160,32 +185,32 @@ exports.setNotificationsRead = (req, res) => {
 exports.getUser = (req, res) => {
   modelUser
     .findOne({
-      handle: req.params.handle
+      handle: req.params.handle,
     })
     .then((user) => {
       user.hash = "secret";
       modelScream
         .find({
-          handle: req.params.handle
+          handle: req.params.handle,
         })
         .sort({
-          createdAt: "desc"
+          createdAt: "desc",
         })
         .then((data) => {
           res.json({
             posts: data,
-            user: user
+            user: user,
           });
         })
         .catch((err) => {
           return res.json({
-            error: "ERRRRRRRRRRRRRRR"
+            error: "ERRRRRRRRRRRRRRR",
           });
         });
     })
     .catch((err) => {
       return res.json({
-        error: "x"
+        error: "x",
       });
     });
 };
@@ -193,9 +218,11 @@ exports.getUser = (req, res) => {
 exports.getAuthUser = async (req, res) => {
   const posts = [];
   const user = await modelUser.findById(ObjectID(req.user.id));
-  const postCur = modelScream.find({
-    handle: user.handle
-  }).cursor();
+  const postCur = modelScream
+    .find({
+      handle: user.handle,
+    })
+    .cursor();
   cursor.next.then((doc) => {
     modelLike.find({});
   });
@@ -209,13 +236,13 @@ exports.addUserDetails = (req, res) => {
     .update(userDetails)
     .then(() => {
       return res.json({
-        message: "Details Updated !"
+        message: "Details Updated !",
       });
     })
     .catch((err) => {
       console.error(err);
       return res.status(500).json({
-        error: err.code
+        error: err.code,
       });
     });
 };
@@ -266,7 +293,7 @@ exports.getAuthUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       return res.status(500).json({
-        error: err
+        error: err,
       });
     });
 };
@@ -283,9 +310,10 @@ exports.getUserDetails = (req, res) => {
           .where("handle", "==", req.params.handle)
           .orderBy("createdAt", "desc")
           .get();
-      } else return res.status(404).json({
-        error: "user Not Found"
-      });
+      } else
+        return res.status(404).json({
+          error: "user Not Found",
+        });
     })
     .then((data) => {
       userData.scream = [];
@@ -305,7 +333,7 @@ exports.getUserDetails = (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(501).json({
-        error: err.code
+        error: err.code,
       });
     });
 };

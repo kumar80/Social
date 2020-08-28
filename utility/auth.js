@@ -1,32 +1,26 @@
 const jwt = require("jsonwebtoken");
-const {
-  modelUser
-} = require("./admin");
-const {
-  UnauthorizedError
-} = require("express-jwt");
-const {
-  jwtKey,
-  jwtExpirySeconds
-} = require("./config");
+const { modelUser } = require("./admin");
+const { UnauthorizedError } = require("express-jwt");
+const { jwtKey, jwtExpirySeconds } = require("./config");
 const bcrypt = require("bcrypt");
 
-const passportCallback = async (username, password, done) => {
+const passportCallback = async (email, password, done) => {
   modelUser
     .findOne({
-      handle: username
+      email: email,
     })
     .then(async (user) => {
       if (!user) {
         return done(null, false, {
-          message: "Incorrect username."
+          message: "Incorrect email.",
         });
       }
       const ok = await user.validatePassword(password);
       if (ok) return done(null, user);
-      else return done(null, false, {
-        message: "Incorrect Password."
-      });
+      else
+        return done(null, false, {
+          message: "Incorrect Password.",
+        });
     })
     .catch((err) => {
       console.log(err);
@@ -36,9 +30,7 @@ const passportCallback = async (username, password, done) => {
 
 const getTokenFromHeaders = (req) => {
   const {
-    headers: {
-      authorization
-    },
+    headers: { authorization },
   } = req;
   if (authorization && authorization.split(" ")[0] === "Token") {
     return authorization.split(" ")[1];
@@ -51,24 +43,24 @@ const auth = (req, res, next) => {
 
   if (token === null)
     return res.status(401).json({
-      message: "UnauthorizedError"
+      message: "UnauthorizedError",
     });
 
   var payload;
-  
+
   try {
     payload = jwt.verify(token, jwtKey);
   } catch (err) {
     if (err instanceof jwt.JsonWebTokenError)
       return res.status(401).json({
-        error: "Unauthorized Access"
+        error: "Unauthorized Access",
       });
 
     return res.status(400).json({
-      error: "unknown error"
+      error: "unknown error",
     });
   }
-  const user = {}
+  const user = {};
   user.avatar = payload.avatar;
   user.id = payload.id;
   user.email = payload.email;
@@ -79,5 +71,5 @@ const auth = (req, res, next) => {
 
 module.exports = {
   passportCallback,
-  auth
+  auth,
 };
