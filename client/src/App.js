@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import createMuiTheme from "@material-ui/core/styles/createMuiTheme";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
+import CssBaseline from "@material-ui/core/CssBaseline";
 
 import "./App.css";
 import home from "./Pages/home";
 import login from "./Pages/login";
 import signup from "./Pages/signup";
 import Navbar from "./Components/Navbar";
-import { Switch as Toogle, FormControlLabel } from "@material-ui/core";
 
 const themeObject = {
   palette: {
-    type: "dark",
+    type: "light",
     primary: {
       light: "#33c9dc",
       main: "#00bcd4",
@@ -27,22 +27,27 @@ const themeObject = {
     },
   },
 };
+
 const useDarkMode = () => {
   const [theme, setTheme] = useState(themeObject);
+
   const {
     palette: { type },
   } = theme;
+
   const toogleDarkMode = () => {
     console.log(theme);
     const updatedTheme = {
-      ...theme,
+      // ...theme,
       palette: {
         ...theme.palette,
         type: type === "light" ? "dark" : "light",
       },
     };
+    updatedTheme.palette.primary.light = "#FFFFFF";
     setTheme(updatedTheme);
   };
+
   return [theme, toogleDarkMode];
 };
 
@@ -52,12 +57,10 @@ function App() {
   const theme = createMuiTheme(currTheme);
   return (
     <MuiThemeProvider theme={theme}>
-      <FormControlLabel control={<Toogle onClick={toogleDarkMode} />} />
-
-      {/* <div className="App">
+      <CssBaseline />
+      <div className="App">
         <Router>
-
-          <Navbar />
+          <Navbar toogleDarkMode={toogleDarkMode} />
           <div className="container">
             <Switch>
               <Route exact path="/" component={home}></Route>
@@ -66,7 +69,7 @@ function App() {
             </Switch>
           </div>
         </Router>
-      </div> */}
+      </div>
     </MuiThemeProvider>
   );
 }
