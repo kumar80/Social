@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import { Link } from "react-router-dom";
+
 import withStyles from "@material-ui/styles/withStyles";
 import Grid from "@material-ui/core/Grid";
 import { Typography } from "@material-ui/core";
@@ -9,6 +11,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 import axios from "axios";
 
@@ -30,7 +33,12 @@ const styles = {
   },
   loginButton: {
     marginTop: 20,
+    marginRight: 5,
+    position: "relative",
   },
+  loginProgress:{
+    position: "absolute",
+  }
 };
 
 const Login = (props) => {
@@ -38,25 +46,30 @@ const Login = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, errorMessage] = useState({});
+  const [loading, setLoading] = useState(false);
+
   const { classes } = props;
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    //  console.log(errors);
+    setLoading(true);
     const loginCredentials = {
       email: email,
       password: password,
     };
     axios
-      .post("http://localhost:9999/login", loginCredentials)
+      .post("http://localhost:8080/login", loginCredentials)
       .then(async (res) => {
-        //  const data = await res.json();
+        setLoading(false)
         console.log(res.data);
-        props.history.push("/");
+        if (res.data.error) errorMessage(res.data.error);
+        //props.history.push("/");
       })
       .catch((err) => {
-        const e = {
-          error: err.response.data,
-        };
-        errorMessage(e);
+        const { error } = err.response.data;
+        setLoading(false);
+        errorMessage(error);
       });
   };
 
@@ -77,7 +90,8 @@ const Login = (props) => {
             className={classes.loginField}
             variant="outlined"
             autoComplete="username"
-            helperText={errors.email}
+            error={errors.type === "email" ? true : false}
+            helperText={errors.type === "email" ? errors.message : ""}
             fullWidth
             onChange={(event) => setEmail(event.target.value)}
           />
@@ -90,7 +104,8 @@ const Login = (props) => {
             variant="outlined"
             autoComplete="current-password"
             onChange={(event) => setPassword(event.target.value)}
-            helperText={errors.password}
+            error={errors.type === "password" ? true : false}
+            helperText={errors.type === "password" ? errors.message : ""}
             fullWidth
             InputProps={{
               endAdornment: (
@@ -113,10 +128,22 @@ const Login = (props) => {
             variant="contained"
             color="primary"
             className={classes.loginButton}
+            disabled={loading}
           >
-            {" "}
-            Login{" "}
+            Login
+            {loading && (
+              <CircularProgress size={30}
+                className={classes.loginProgress}
+              ></CircularProgress>
+            )}
           </Button>
+          <br />
+          <small>
+            Don't Have an account? Sign up{" "}
+            <Link to="/signup" color="primary">
+              here!
+            </Link>{" "}
+          </small>
         </form>
       </Grid>
       <Grid item sm />

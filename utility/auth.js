@@ -12,18 +12,24 @@ const passportCallback = async (email, password, done) => {
     .then(async (user) => {
       if (!user) {
         return done(null, false, {
-          message: "Incorrect email.",
+          error: {
+            message: "Incorrect email.",
+            type: "email"
+          },
         });
       }
       const ok = await user.validatePassword(password);
       if (ok) return done(null, user);
       else
         return done(null, false, {
-          message: "Incorrect Password.",
+          error: {
+            message: "Incorrect Password.",
+            type: "password",
+          },
         });
     })
     .catch((err) => {
-      console.log(err);
+      //   console.log(err);
       done(err);
     });
 };

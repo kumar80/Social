@@ -64,7 +64,7 @@ exports.signup = async (req, res) => {
     handle: req.body.handle,
     bio: "xxx",
     createdAt: new Date().toISOString(),
-    avatar: req.body.handle+'.' + defaultAvatarExtension,
+    avatar: req.body.handle + "." + defaultAvatarExtension,
   });
 
   const doc = await modelUser.find({
@@ -117,7 +117,7 @@ exports.signup = async (req, res) => {
 };
 
 exports.getAvatar = (req, res) => {
-  res.sendFile(avatarDir + '/' +  `${req.params.avatar}`);
+  res.sendFile(avatarDir + "/" + `${req.params.avatar}`);
 };
 
 exports.login = (req, res, next) => {
@@ -125,14 +125,20 @@ exports.login = (req, res, next) => {
 
   const { body: user } = req;
   if (!user.email) {
-    return res.status(422).json({
-      error: "email is required",
+    return res.json({
+      error: {
+        message: "Email is required.",
+        type: "email"
+      },
     });
-  } 
+  }
 
   if (!user.password) {
-    return res.status(422).json({
-      error: "password is required",
+    return res.json({
+      error: {
+        message: "Password is required.",
+        type: "password",
+      },
     });
   }
   passport.authenticate(
@@ -144,7 +150,7 @@ exports.login = (req, res, next) => {
       if (info) {
         return res.send(info);
       }
-     // console.log(err);
+      // console.log(err);
       if (err) {
         return res.json({
           error: err,
@@ -154,7 +160,7 @@ exports.login = (req, res, next) => {
         return res.redirect("/login");
       }
       const token = user.generateJWT();
-     //  console.log(token);
+      //  console.log(token);
       res.json(token);
     }
   )(req, res);

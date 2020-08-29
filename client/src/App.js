@@ -30,11 +30,11 @@ const themeObject = {
 
 const useDarkMode = () => {
   const [theme, setTheme] = useState(themeObject);
-
-  const {
+  
+   const {
     palette: { type },
   } = theme;
-
+ 
   const toogleDarkMode = () => {
     const updatedTheme = {
       // ...theme,
@@ -45,6 +45,7 @@ const useDarkMode = () => {
     };
     updatedTheme.palette.primary.light = "#FFFFFF";
     setTheme(updatedTheme);
+    localStorage.setItem('theme',type === "light" ? "dark" : "light")
   };
 
   return [theme, toogleDarkMode];
@@ -52,8 +53,7 @@ const useDarkMode = () => {
 
 function App() {
   const [currTheme, toogleDarkMode] = useDarkMode();
-
-  const theme = createMuiTheme(currTheme);
+  let theme = createMuiTheme(currTheme);
   return (
     <MuiThemeProvider theme={theme}>
       <CssBaseline />

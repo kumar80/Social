@@ -6,7 +6,7 @@ const { passportCallback, auth } = require("./utility/auth");
 const LocalStrategy = require("passport-local").Strategy;
 var cors = require('cors')
 
-const PORT = process.env.PORT || 9999;
+const PORT = process.env.PORT || 8080;
 
 const {
   createPost,
