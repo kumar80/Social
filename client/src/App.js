@@ -28,34 +28,47 @@ const themeObject = {
   },
 };
 
-const useDarkMode = () => {
-  const [theme, setTheme] = useState(themeObject);
-  
-   const {
-    palette: { type },
-  } = theme;
- 
-  const toogleDarkMode = () => {
-    const updatedTheme = {
-      // ...theme,
-      palette: {
-        ...theme.palette,
-        type: type === "light" ? "dark" : "light",
-      },
-    };
-    updatedTheme.palette.primary.light = "#FFFFFF";
-    setTheme(updatedTheme);
-    localStorage.setItem('theme',type === "light" ? "dark" : "light")
-  };
-
-  return [theme, toogleDarkMode];
-};
 
 function App() {
-  const [currTheme, toogleDarkMode] = useDarkMode();
-  let theme = createMuiTheme(currTheme);
+  const [theme, setTheme] = useState(themeObject);
+  const [themeChanging, setThemeChanging] = useState(true);
+
+  useEffect(() => {
+    if (localStorage.getItem("theme") === null) {
+      localStorage.setItem("theme", "light");
+    } else {
+      const type = localStorage.getItem("theme");
+      const updatedTheme = {
+        // ...theme,
+        palette: {
+          ...theme.palette,
+          type: type === "light" ? "light" : "dark",
+        },
+      };
+      setTheme(updatedTheme);
+    }
+  }, []);
+
+  const toogleDarkMode = async () => {
+    setThemeChanging(false);
+    const type = localStorage.getItem('theme');
+    // console.log(type);
+    const newType = type === "light" ? "dark" : "light";
+    const updatedTheme = {
+      palette: {
+        ...theme.palette,
+        type: newType,
+      },
+    };
+    localStorage.setItem("theme", newType);
+
+    setTheme(updatedTheme);
+    setThemeChanging(true);
+  };
+
+  let Muitheme = createMuiTheme(theme);
   return (
-    <MuiThemeProvider theme={theme}>
+    <MuiThemeProvider theme={Muitheme}>
       <CssBaseline />
       <div className="App">
         <Router>

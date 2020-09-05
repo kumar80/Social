@@ -138,12 +138,12 @@ const Login = (props) => {
             )}
           </Button>
           <br />
-          <small>
+          <big>
             Don't Have an account? Sign up{" "}
             <Link to="/signup" color="primary">
               here!
             </Link>{" "}
-          </small>
+          </big>
         </form>
       </Grid>
       <Grid item sm />

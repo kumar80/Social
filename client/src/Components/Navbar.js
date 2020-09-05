@@ -27,7 +27,14 @@ const Navbar = (props) => {
         >
           SIGNUP
         </Button>
-        <FormControlLabel control={<Toogle onClick={toogleDarkMode} />} />
+        <FormControlLabel
+          control={
+            <Toogle
+              onClick={toogleDarkMode}
+              checked={localStorage.getItem("theme") === "dark" ? true : false}
+            />
+          }
+        />
       </Toolbar>
     </AppBar>
   );

@@ -57,7 +57,6 @@ exports.uploadImage = async (req, res) => {
 
 exports.signup = async (req, res) => {
   const bcrypt = require("bcrypt");
-  const fs = require("fs");
 
   const newUser = new modelUser({
     email: req.body.email,
@@ -66,20 +65,34 @@ exports.signup = async (req, res) => {
     createdAt: new Date().toISOString(),
     avatar: req.body.handle + "." + defaultAvatarExtension,
   });
+  const errors = {};
 
-  const doc = await modelUser.find({
-    $or: [
-      {
-        handle: newUser.handle,
-      },
-      {
-        email: newUser.email,
-      },
-    ],
-  });
-  if (doc.length !== 0)
-    return res.status(400).json({
-      error: "Handle Or Email already taken",
+   modelUser
+    .find({
+      email: newUser.email,
+    })
+    .then((docEmail) => {
+      if (docEmail.email !== undefined) {
+        errors.email = "Email Already Taken";
+        return res.json(errors);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+   modelUser
+    .find({
+      handle: newUser.handle,
+    })
+    .then((docHandle) => {
+      if (docHandle.handle !== undefined) {
+        errors.handle = "handle Already Taken";
+        return res.json(errors);
+      }
+    })
+    .catch((err) => {
+      console.log(err);
     });
 
   bcrypt.hash(req.body.password, 15, (err, hash) => {
@@ -88,7 +101,7 @@ exports.signup = async (req, res) => {
         error: " Something went wrong#1",
       });
     }
-
+    const fs = require("fs");
     fs.copyFile(
       avatarDir + "/" + defaultAvatar,
       avatarDir + "/" + newUser.handle + "." + defaultAvatarExtension,
@@ -128,7 +141,7 @@ exports.login = (req, res, next) => {
     return res.json({
       error: {
         message: "Email is required.",
-        type: "email"
+        type: "email",
       },
     });
   }
