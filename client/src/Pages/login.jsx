@@ -36,9 +36,9 @@ const styles = {
     marginRight: 5,
     position: "relative",
   },
-  loginProgress:{
+  loginProgress: {
     position: "absolute",
-  }
+  },
 };
 
 const Login = (props) => {
@@ -61,10 +61,13 @@ const Login = (props) => {
     axios
       .post("http://localhost:8080/login", loginCredentials)
       .then(async (res) => {
-        setLoading(false)
-        console.log(res.data);
+        setLoading(false);
         if (res.data.error) errorMessage(res.data.error);
-        //props.history.push("/");
+        else {
+          localStorage.setItem("FBtoken", res.data.token);
+          props.history.push("/");
+          //console.log(res.data);
+        }
       })
       .catch((err) => {
         const { error } = err.response.data;
@@ -132,7 +135,8 @@ const Login = (props) => {
           >
             Login
             {loading && (
-              <CircularProgress size={30}
+              <CircularProgress
+                size={30}
                 className={classes.loginProgress}
               ></CircularProgress>
             )}

@@ -4,12 +4,19 @@ import createMuiTheme from "@material-ui/core/styles/createMuiTheme";
 import { ThemeProvider as MuiThemeProvider } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
 
+import jwtDecode from 'jwt-decode';
+
 import "./App.css";
 import home from "./Pages/home";
 import login from "./Pages/login";
 import signup from "./Pages/signup";
 import Navbar from "./Components/Navbar";
 
+const FBtoken = localStorage.getItem('FBtoken');
+if(FBtoken){
+  const data =  jwtDecode(FBtoken);
+  console.log(data);
+}
 const themeObject = {
   palette: {
     type: "light",

@@ -77,6 +77,7 @@ const Signup = (props) => {
   const isEmpty = (obj) => {
     return Object.keys(obj).length === 0 && obj.constructor === Object;
   };
+
   const handleSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
@@ -89,7 +90,7 @@ const Signup = (props) => {
     };
     const errorValidating = await validate(newUser);
     if (!isEmpty(errorValidating)) {
-   //   console.log(errorValidating);
+      //   console.log(errorValidating);
       errorMessage(errorValidating);
       setLoading(false);
       return;
@@ -97,15 +98,19 @@ const Signup = (props) => {
     axios
       .post("http://localhost:8080/signup", newUser)
       .then(async (res) => {
+        if (res.data.errors) errorMessage(res.data.errors);
+        else {
+          localStorage.setItem('FBtoken',res.data.user.token)
+          props.history.push("/");
+        }
         console.log(res.data);
-        if (res.data.error) errorMessage(res.data.error);
-        //props.history.push("/");
         setLoading(false);
       })
       .catch((err) => {
+        // console.log(err)
         const { error } = err.response.data;
         setLoading(false);
-        errorMessage(error);
+        errorMessage(err);
       });
   };
 
@@ -233,7 +238,7 @@ const Signup = (props) => {
           <big>
             Already have an account? Log in{" "}
             <Link to="/login" color="primary">
-              here!
+              <u>here!</u>
             </Link>{" "}
           </big>
         </form>

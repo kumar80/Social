@@ -28,7 +28,7 @@ const {
   getAvatar,
 } = require("./handlers/users.js");
 
-app.use(cors({origin : 'http://localhost:3000'}));
+app.use(cors({origin : 'http://localhost:3001'}));
 app.use(bodyParser.json());
 app.use(require("morgan")("dev"));
 app.use(passport.initialize());

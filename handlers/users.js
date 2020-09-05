@@ -67,33 +67,22 @@ exports.signup = async (req, res) => {
   });
   const errors = {};
 
-   modelUser
-    .find({
-      email: newUser.email,
-    })
-    .then((docEmail) => {
-      if (docEmail.email !== undefined) {
-        errors.email = "Email Already Taken";
-        return res.json(errors);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  const docEmail = await modelUser.findOne({
+    email: newUser.email,
+  });
+  const docHandle = await modelUser.findOne({
+    handle: newUser.handle,
+  });
 
-   modelUser
-    .find({
-      handle: newUser.handle,
-    })
-    .then((docHandle) => {
-      if (docHandle.handle !== undefined) {
-        errors.handle = "handle Already Taken";
-        return res.json(errors);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  if (docHandle !== null && docHandle.handle !== undefined) {
+    errors.handle = "handle Already Taken";
+    return res.json({ errors: errors });
+  }
+
+  if (docEmail !== null && docEmail.email !== undefined) {
+    errors.email = "Email Already Taken";
+    return res.json({ errors: errors });
+  }
 
   bcrypt.hash(req.body.password, 15, (err, hash) => {
     if (err) {
@@ -172,9 +161,9 @@ exports.login = (req, res, next) => {
       if (!user) {
         return res.redirect("/login");
       }
-      const token = user.generateJWT();
+      const data = user.toAuthJSON();
       //  console.log(token);
-      res.json(token);
+      res.json(data);
     }
   )(req, res);
 };
