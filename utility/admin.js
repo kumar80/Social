@@ -31,16 +31,6 @@ const schemaLikes = new mongoose.Schema({
   notificationId: String,
 });
 
-const schemaAvatar = new mongoose.Schema({
-  handle: String,
-  path: String,
-  fileName: String,
-  userId: String,
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-});
 
 const schemaUser = new mongoose.Schema({
   handle: String,
@@ -50,6 +40,11 @@ const schemaUser = new mongoose.Schema({
   email: String,
   hash: String,
 });
+
+const schemaUserDetails = new mongoose.Schema({
+    handle: String,
+})
+
 
 const schemaNotification = new mongoose.Schema({
   type: String,
@@ -102,15 +97,15 @@ schemaUser.methods.toAuthJSON = function () {
 const modelScream = mongoose.model("Screams", schemaScream);
 const modelComment = mongoose.model("Comments", schemaComment);
 const modelLike = mongoose.model("Likes", schemaLikes);
-const modelAvatar = mongoose.model("Avatars", schemaAvatar);
 const modelUser = mongoose.model("Users", schemaUser);
 const modelNotification = mongoose.model("Notifications", schemaNotification);
+const modelUserDetails = mongoose.model("UserDetails", schemaUserDetails);
 
 module.exports = {
   modelScream,
   modelComment,
   modelLike,
-  modelAvatar,
   modelUser,
   modelNotification,
+  modelUserDetails,
 };

@@ -1,9 +1,9 @@
 const {
-  modelAvatar,
   modelUser,
   modelNotification,
   modelScream,
   modelLike,
+  modelUserDetails,
 } = require("../utility/admin.js");
 const { validateSignup, validateLogin } = require("../utility/validators.js");
 const { ObjectID } = require("mongodb");
@@ -65,6 +65,8 @@ exports.signup = async (req, res) => {
     createdAt: new Date().toISOString(),
     avatar: req.body.handle + "." + defaultAvatarExtension,
   });
+
+  const newUserDetails = new modelUserDetails({});
   const errors = {};
 
   const docEmail = await modelUser.findOne({
@@ -106,6 +108,9 @@ exports.signup = async (req, res) => {
     newUser
       .save()
       .then(() => {
+        newUserDetails._id = newUser._id;
+        newUserDetails.handle = newUser.handle;
+        newUserDetails.save();
         return res.json({
           user: newUser.toAuthJSON(),
         });
@@ -120,6 +125,25 @@ exports.signup = async (req, res) => {
 
 exports.getAvatar = (req, res) => {
   res.sendFile(avatarDir + "/" + `${req.params.avatar}`);
+};
+
+exports.broadcast = async (req, res) => {
+  const query = [];
+  const tags = req.body.tags;
+  tags.forEach((key) => {
+  //  const 
+    query.push({ [`${key}`]: true });
+  });
+  console.log(query);
+  const data = await modelUserDetails.find({ $or: query });
+  data.forEach((doc) => {
+    const newNotification = modelNotification({
+      type: "broadcast",
+      sender: req.user.handle,
+      receiver: doc.handle,
+    });
+    newNotification.save();
+  });
 };
 
 exports.login = (req, res, next) => {

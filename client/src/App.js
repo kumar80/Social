@@ -6,7 +6,7 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 
 import jwtDecode from 'jwt-decode';
 
-import "./App.css";
+import style from "./App.css";
 import home from "./Pages/home";
 import login from "./Pages/login";
 import signup from "./Pages/signup";

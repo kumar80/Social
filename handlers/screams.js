@@ -45,7 +45,7 @@ exports.comment = async (req, res) => {
 
   const newNotification = {
     _id: ObjectId(req.user.id),
-    sender: req.body.handle,
+    sender: req.user.handle,
     receiver: scream.handle,
     type: "comment",
   };
@@ -93,14 +93,14 @@ exports.likeScream = async (req, res) => {
     });
 
   const newNotification = {
-    sender: req.body.handle,
+    sender: req.user.handle,
     receiver: scream.handle,
     type: "like",
   };
   const notification = new modelNotification(newNotification);
   const data = await notification.save();
   const newLike = new modelLike();
-  console.log(data);
+ // console.log(data);
   newLike.createdAt = new Date().toISOString();
   newLike.handle = req.body.handle;
   newLike.screamId = req.params.screamId;

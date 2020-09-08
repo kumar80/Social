@@ -26,9 +26,10 @@ const {
   getUser,
   setNotificationsRead,
   getAvatar,
+  broadcast,
 } = require("./handlers/users.js");
 
-app.use(cors({origin : 'http://localhost:3001'}));
+app.use(cors({origin : 'http://localhost:3000'}));
 app.use(bodyParser.json());
 app.use(require("morgan")("dev"));
 app.use(passport.initialize());
@@ -43,6 +44,7 @@ app.delete("/scream/:screamId/unlike", auth,unlikeScream);
 app.delete("/scream/:screamId/deletecomment", auth,deleteComment);
 app.delete("/scream/:screamId/delete", auth,deleteScream);
 
+app.post("/broadcast", auth, broadcast);
 app.post("/scream/:screamId/comment", auth,comment);
 app.post("/scream",auth, createPost);
 app.post("/avatar/upload", auth,uploadImage);
