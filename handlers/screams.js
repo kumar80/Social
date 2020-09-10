@@ -4,14 +4,12 @@ const {
   modelLike,
   modelNotification,
 } = require("../utility/admin.js");
-const {
-  ObjectId
-} = require("mongodb");
+const { ObjectId } = require("mongodb");
 
 exports.createPost = (req, res) => {
   if (req.body.body === undefined)
     return res.status(400).json({
-      comment: "Empty Body is not allowed"
+      comment: "Empty Body is not allowed",
     });
   console.log(req.user);
   const doc = new modelScream();
@@ -33,14 +31,14 @@ exports.createPost = (req, res) => {
 exports.comment = async (req, res) => {
   if (req.body.body === undefined)
     return res.status(400).json({
-      comment: "Empty Comment is not allowed"
+      comment: "Empty Comment is not allowed",
     });
 
   const scream = await modelScream.findById(ObjectId(req.params.screamId));
 
   if (scream === null)
     return res.status(400).json({
-      error: "Post doest not exists"
+      error: "Post doest not exists",
     });
 
   const newNotification = {
@@ -79,7 +77,7 @@ exports.likeScream = async (req, res) => {
 
   if (scream === null)
     return res.status(400).json({
-      error: "Post doest not exists"
+      error: "Post doest not exists",
     });
 
   if (
@@ -89,7 +87,7 @@ exports.likeScream = async (req, res) => {
     })) !== null
   )
     return res.status(400).json({
-      error: "You have already liked the post"
+      error: "You have already liked the post",
     });
 
   const newNotification = {
@@ -100,7 +98,7 @@ exports.likeScream = async (req, res) => {
   const notification = new modelNotification(newNotification);
   const data = await notification.save();
   const newLike = new modelLike();
- // console.log(data);
+  // console.log(data);
   newLike.createdAt = new Date().toISOString();
   newLike.handle = req.body.handle;
   newLike.screamId = req.params.screamId;
@@ -122,15 +120,16 @@ exports.unlikeScream = async (req, res) => {
 
   if (scream === null)
     return res.status(204).json({
-      error: "Post doest not exists"
+      error: "Post doest not exists",
     });
   const doc = await modelLike.findOne({
     handle: req.user.handle,
     screamId: req.params.screamId,
   });
-  if (doc === null) return res.status(204).json({
-    error: "Cannot unlike"
-  });
+  if (doc === null)
+    return res.status(204).json({
+      error: "Cannot unlike",
+    });
 
   await modelNotification.findOneAndDelete({
     _id: ObjectId(doc.notificationId),
@@ -149,7 +148,7 @@ exports.unlikeScream = async (req, res) => {
     .catch((err) => {
       console.log("!! unlike Error !!", err);
       res.status(500).json({
-        error: "unknown error"
+        error: "unknown error",
       });
     });
 };
@@ -159,15 +158,16 @@ exports.deleteComment = async (req, res) => {
 
   if (scream === null)
     return res.status(204).json({
-      error: "Post doest not exists"
+      error: "Post doest not exists",
     });
   const doc = await modelComment.findOne({
     handle: req.user.handle,
     screamId: req.params.screamId,
   });
-  if (doc === null) return res.status(204).json({
-    error: "Cannot unlike"
-  });
+  if (doc === null)
+    return res.status(204).json({
+      error: "Cannot unlike",
+    });
 
   await modelNotification.findOneAndDelete({
     _id: ObjectId(doc.notificationId),
@@ -186,7 +186,7 @@ exports.deleteComment = async (req, res) => {
     .catch((err) => {
       console.log("!! Comment Delete Error !!", err);
       res.status(500).json({
-        error: "unknown error"
+        error: "unknown error",
       });
     });
 };
@@ -196,26 +196,26 @@ exports.deleteScream = async (req, res) => {
 
   if (scream === null)
     return res.status(204).json({
-      error: "Post doest not exists"
+      error: "Post doest not exists",
     });
   if (scream.handle !== req.user.handle)
     return res.status(401).json({
-      error: "You can Delete only your Posts"
+      error: "You can Delete only your Posts",
     });
 
   scream.delete();
 
   const d1 = await modelLike.deleteMany({
-    screamId: req.params.screamId
+    screamId: req.params.screamId,
   });
   const d2 = await modelComment.deleteMany({
-    screamId: req.params.screamId
+    screamId: req.params.screamId,
   });
 
   if (d1.ok == 1 && d2.ok == 1) return res.status(200).json("Post Deleted");
 
   return res.status(500).json({
-    error: "Error Deleting"
+    error: "Error Deleting",
   });
 };
 
@@ -223,16 +223,16 @@ exports.feed = (req, res) => {
   modelScream
     .find({})
     .sort({
-      createdAt: "desc"
+      createdAt: "desc",
     })
     .then((user) => {
       console.log("SENT");
       res.json(user);
     })
     .catch((err) => {
-     // console.log(err);
+      // console.log(err);
       res.json({
-        error: "error fetching posts"
+        error: "error fetching posts",
       });
     });
 };
@@ -242,17 +242,18 @@ exports.getScream = async (req, res) => {
   modelScream
     .findById(ObjectId(req.params.screamId))
     .then((scream) => {
-      if (scream === null) return res.json({
-        error: "Post does not exists "
-      });
+      if (scream === null)
+        return res.json({
+          error: "Post does not exists ",
+        });
       screamData.scream = scream;
       screamData.comments = [];
       modelComment
         .find({
-          screamId: req.params.screamId
+          screamId: req.params.screamId,
         })
         .sort({
-          createdAt: "desc"
+          createdAt: "desc",
         })
         .then((doc) => {
           console.log(doc);

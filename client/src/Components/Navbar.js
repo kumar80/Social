@@ -4,9 +4,9 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
 import { Switch as Toogle, FormControlLabel } from "@material-ui/core";
-
+import NotificationsIcon from '@material-ui/icons/Notifications';
 import styles from "./Navbar.module.css";
-
+import HomeIcon from '@material-ui/icons/Home';
 const Navbar = (props) => {
   const { toogleDarkMode } = props;
 
@@ -14,8 +14,9 @@ const Navbar = (props) => {
     <AppBar position="fixed">
       <Toolbar className="toolbar-container">
         <Button color="inherit" component={Link} to="/">
-          HOME
+        <HomeIcon/>
         </Button>
+        <NotificationsIcon />
         <Button color="inherit" component={Link} to="/login">
           LOGIN
         </Button>
