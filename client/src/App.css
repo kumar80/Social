@@ -4,6 +4,7 @@
 .container {
   margin: 80px auto 0 auto;
   max-width: 1200px;
+  margin-top: 100px;
 }
 .toolbar-container {
   margin: auto 1000px;

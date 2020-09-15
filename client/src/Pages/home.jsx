@@ -8,6 +8,7 @@ import withStyles from "@material-ui/styles/withStyles";
 import Fab from "@material-ui/core/Fab";
 import CancelIcon from "@material-ui/icons/Cancel";
 import Postcard from "../Components/Postcard";
+import { set } from "mongoose";
 
 const styles = {
   button: {
@@ -15,35 +16,23 @@ const styles = {
     marginRight: 5,
     position: "relative",
     textTransform: "none",
-
   },
   taginput: {
     marginLeft: 10,
     position: "relative",
+    width: 250,
   },
-};
-
-const handleSubmit = (e) => {
-  e.preventDefault();
+  messageinput: {
+    marginTop: 10,
+  },
 };
 
 const Home = (props) => {
   const [posts, setPosts] = useState([]);
   const { classes } = props;
-  const [tags, setTags] = useState(["ada", "asdad"]);
-  const [x, setx] = useState(
-    tags.map((tag, i) => (
-      <Fab variant="extended" size="small" key={i}>
-        {tag}
-        <CancelIcon
-          key={i}
-          onClick={() => {
-            removeTag(i);
-          }}
-        />
-      </Fab>
-    ))
-  );
+  const [tags, setTags] = useState([]);
+  const [x, setx] = useState();
+
   useEffect(() => {
     axios
       .get("http://localhost:8080/feed")
@@ -57,7 +46,26 @@ const Home = (props) => {
       });
   }, []);
 
+  const handleSubmit = (e) => {
+    let p = new FormData(e.target);
+    e.preventDefault();
+    axios
+      .post("http://localhost:8080/broadcast", {
+        message: p.get("message"),
+        tags: tags,
+      })
+      .then((res) => {
+        let status = res.data;
+        //console.log(status)
+      })
+      .catch((err) => {
+        console.log("Error Broadcasting", err);
+      });
+  };
+
   const renderTags = () => {
+    if (!tags.length) return setx(<div></div>);
+
     const d = tags.map((tag, i) => (
       <Fab variant="extended" size="small" key={i}>
         {tag}
@@ -73,7 +81,6 @@ const Home = (props) => {
   };
 
   const inputKeyDown = (e) => {
-    //e.preventDefault();
     const val = e.target.value;
     if (e.key === "Enter" && val) {
       if (tags.find((tag) => tag === val)) return;
@@ -81,12 +88,13 @@ const Home = (props) => {
       let newTags = tags;
       newTags.push(val);
       setTags(newTags);
+      e.target.value = "";
     } else if (e.key === "Backspace" && !val) {
       let newTags = tags;
       newTags.pop();
       setTags(newTags);
-    } else {
     }
+
     renderTags();
   };
 
@@ -104,36 +112,39 @@ const Home = (props) => {
   } else {
     feedData = <p key="0">Loading...</p>;
   }
-  let inputTag = React.createRef();
+
   return (
     <div>
-      <form onSubmit={handleSubmit} method="POST">
-        <TextField
-          id="message"
-          name="message"
-          label="Enter Message"
-          variant="outlined"
-          fullWidth
-        />
-        <ul>
-          {x}
+      <div className={classes.messageinput}>
+        <form id="formB" onSubmit={handleSubmit} method="POST">
           <TextField
-            id="addTag"
-            name="addTag"
-            type="text"
-            onKeyDown={inputKeyDown}
-            className={classes.taginput}
-          ></TextField>
-        </ul>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          className={classes.button}
-        >
-          Broadcast Message
-        </Button>
-      </form>
+            id="message"
+            name="message"
+            label="Enter Message"
+            variant="outlined"
+            fullWidth
+          />
+          <ul>
+            {x}
+            <TextField
+              id="addTag"
+              name="addTag"
+              type="text"
+              label="Enter Tag and Press Enter"
+              onKeyDown={inputKeyDown}
+              className={classes.taginput}
+            ></TextField>
+          </ul>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            className={classes.button}
+          >
+            Broadcast Message
+          </Button>
+        </form>
+      </div>
       <Grid container spacing={10}>
         <Grid item sm={8} xs={12} key="4">
           {feedData}

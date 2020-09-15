@@ -129,21 +129,21 @@ exports.getAvatar = (req, res) => {
 
 exports.broadcast = async (req, res) => {
   const query = [];
-  const tags = req.body.tags;
+  const { tags, message } = req.body;
   tags.forEach((key) => {
-  //  const 
     query.push({ [`${key}`]: true });
   });
-  console.log(query);
-  const data = await modelUserDetails.find({ $or: query });
+  const data = await modelUser.find({});
   data.forEach((doc) => {
     const newNotification = modelNotification({
       type: "broadcast",
-      sender: req.user.handle,
-      receiver: doc.handle,
+      sender: "req.user.handle",
+      receiver: "doc.handle",
+      message: message,
     });
     newNotification.save();
   });
+  res.json({ status: "success" });
 };
 
 exports.login = (req, res, next) => {
@@ -192,7 +192,11 @@ exports.login = (req, res, next) => {
   )(req, res);
 };
 
-exports.setNotificationsRead = (req, res) => {
+exports.setNotificationsRead = async (req, res) => {
+  const data = await modelNotification.find({});
+  return res.json({
+    notifications: data,
+  });
   modelNotification.update
     .query(
       {
@@ -204,7 +208,7 @@ exports.setNotificationsRead = (req, res) => {
     )
     .then(() => {
       return res.json({
-        message: "Notifications Read",
+        notifications: data,
       });
     })
     .catch((err) => {

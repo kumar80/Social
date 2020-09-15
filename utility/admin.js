@@ -58,6 +58,7 @@ const schemaNotification = new mongoose.Schema({
   },
   sender: String,
   receiver: String,
+  message : String,
 });
 //https://stackoverflow.com/questions/23667086/why-is-my-variable-unaltered-after-i-modify-it-inside-of-a-function-asynchron
 schemaUser.methods.validatePassword = async function (password) {
